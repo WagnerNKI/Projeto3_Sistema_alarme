@@ -6,6 +6,8 @@ Ultrasonic ultrasonic(9, 8);
 bool digitandoSenha = false;
 String senhaDigitada;
 String senha = "1234";
+long timeDoorOpen;
+int buzz = A1;
 
 const byte ROWS = 4; //four rows
 const byte COLS = 3; //three columns
@@ -25,6 +27,7 @@ void setup(){
   Serial.begin(9600);
   pinMode(A2, INPUT);
   pinMode(A0, INPUT);
+  pinMode(A1, OUTPUT);
 }
   
 void loop(){
@@ -33,7 +36,15 @@ void loop(){
   if (distancia <= 5){
     Serial.println("Favor digitar a senha em ate 10 segundos");
     long now = millis();
-    if ()
+    bool senhaCerta = false;
+
+    while(senhaCerta == false){
+    if (now - timeDoorOpen > 10000){
+      timeDoorOpen = now;
+      tone(buzz, 500);
+      delay (1000);
+      noTone(buzz);
+    }
     char key = keypad.getKey();
   
     if (key){
@@ -42,6 +53,8 @@ void loop(){
         digitandoSenha = false;
         if (senhaDigitada == senha){
           Serial.println ("Alarme desativado");
+          senhaCerta = true;
+          break;
         }
         else{
           Serial.println ("Senha incorreta");
@@ -61,4 +74,5 @@ void loop(){
             }
     }
   }
+}
 }
