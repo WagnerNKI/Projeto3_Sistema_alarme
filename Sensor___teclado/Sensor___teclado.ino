@@ -123,7 +123,7 @@ void loop() {
           }
         }
 
-        if (now - timeDoorOpen > 20000) {
+        if (now - timeDoorOpen > 10000) {
           timeDoorOpen = now;
           apagaAcendeLed(ledRed, ledGreen, ledYellow);
           tone(buzz, 1000);
