@@ -42,7 +42,7 @@ EthernetClient ethclient;
 
 
 // Dados do MQTT Cloud
-PubSubClient clientMqtt("192.168.3.186", 1883, callback, ethclient);
+PubSubClient clientMqtt("m14.cloudmqtt.com", 12207, callback, ethclient);
 
 void apagaAcendeLed(int ledAcesso, int ledApagado1, int ledApagado2, int buzzer) {
   digitalWrite (ledAcesso, HIGH);
@@ -102,7 +102,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 }
 
 boolean reconnect() {
-  if (clientMqtt.connect("", "", "", "vagas/25", 0, true, "")) {
+  if (clientMqtt.connect("teclado", "teclado", "teclado")) {
     // Once connected, publish an announcement...
     clientMqtt.publish("teste", "hello world");
   }
@@ -113,7 +113,6 @@ boolean reconnect() {
 
 void setup() {
 
-
   Serial.begin(9600);
   pinMode(A2, INPUT);
   pinMode(A0, INPUT);
@@ -123,18 +122,23 @@ void setup() {
   pinMode(ledGreen, OUTPUT);
   pinMode(infrared, INPUT);
 
-  // Connect via DHCP
-  //  Serial.println ("Conectando...");
-  if (Ethernet.begin(mac)) {
-    Serial.println("Conectado via DHCP");
-    //    Serial.print("IP recebido:"); Serial.println(Ethernet.localIP());
-    //    delay(50);
+  Serial.println ("Conectando...");
+  Ethernet.begin(mac);
+
+  // Faz a conexão no cloud com nome do dispositivo, usuário e senha respectivamente
+  if (client.connect("arduino", "arduino", "ard123"))
+  {
+    // Envia uma mensagem para o cloud no topic portao
+    client.publish("teste", "v");
+
+    // Conecta no topic para receber mensagens
+    client.subscribe("recebido");
   }
 }
 
 void loop() {
 
-  
+
   if (!clientMqtt.connected()) {
     long now = millis();
     if (now - lastReconnectAttempt > 5000) {

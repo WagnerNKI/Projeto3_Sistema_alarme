@@ -50,13 +50,13 @@ void enviaSms() {
 
   parametros.concat("&body=Sua casa esta sendo invadida");
 
-  Serial.println(parametros);
+//  Serial.println(parametros);
 
   int statusCode = client.post("/sms", parametros.c_str(), &response);
-  Serial.print("Status da resposta: ");
-  Serial.println(statusCode);
-  Serial.print("Resposta do servidor: ");
-  Serial.println(response);
+//  Serial.print("Status da resposta: ");
+//  Serial.println(statusCode);
+//  Serial.print("Resposta do servidor: ");
+//  Serial.println(response);
   delay(1000);
 }
 
@@ -64,7 +64,7 @@ void enviaSms() {
 void callback(char* topic, byte* payload, unsigned int length)
 {
 
-  enviaSms()
+  enviaSms();
 }
 
 boolean reconnect() {
@@ -77,11 +77,6 @@ boolean reconnect() {
 }
 
 void setup() {
-  //  pinMode (ledRed, OUTPUT);
-  //  pinMode (ledGreen, OUTPUT);
-  //  pinMode (ledYellow, OUTPUT);
-
-
   // Inicializa a porta Serial
   Serial.begin(9600);
   Serial.println("Conectando...");
