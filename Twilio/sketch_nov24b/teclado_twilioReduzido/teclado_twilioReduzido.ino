@@ -1,11 +1,14 @@
 #include <Keypad.h>
 
 
-#define SENHA_CERTA "1234 "
+#define SENHA_CERTA "1234"
 #define SENHA_ATIVA "0"
-
+String senhaDigitada;
 bool alarmeAtivado = false;
 bool senhaCerta = false;
+bool digitandoSenha = false;
+int senhaIncorreta;
+bool smsEnviado;
 
 const byte ROWS = 4; //four rows
 const byte COLS = 3; //three columns
@@ -46,30 +49,31 @@ void apagaAcendeLed(int ledAcesso, int ledApagado1, int ledApagado2, int buzzer)
   }
 }
 
-#define SMS_SID AC5ff5d08021fda59e7088098d55945157
-#define SMS_TOKEN a33eab98854ffcb2546bde7618d21da2
-#define SMS_TO 5511963650954
-#define SMS_FROM 13217668522
-const char* parametros = "sid=SMS_SID&token=SMS_TOKEN&to=SMS_TO&from=SMS_FROM&body=Sua casa esta sendo invadida";
+#define SMS_SID "AC5ff5d08021fda59e7088098d55945157"
+#define SMS_TOKEN "a33eab98854ffcb2546bde7618d21da2"
+#define SMS_TO "5511963650954"
+#define SMS_FROM "13217668522"
+const char* parametros = "sid=" SMS_SID "&token=" SMS_TOKEN "&to=" SMS_TO "&from=" SMS_FROM "&body=Sua casa esta sendo invadida";
 
+
+bool eviandoSMS;
 void enviaSms() {
 
-  String response = "";
+  eviandoSMS = true;
+  char response[30] = {};
 
   //  Serial.println(parametros);
 
-  int statusCode = client.post("/sms", parametros, &response);
-  //  Serial.print("Status da resposta: ");
-  //  Serial.println(statusCode);
-  //  Serial.print("Resposta do servidor: ");
-  //  Serial.println(response);
-  delay(1000);
+  int statusCode = client.post("/sms", parametros, response);
+  Serial.print(F("Status da resposta: "));
+  Serial.println(statusCode);
+  Serial.print(F("Resposta do servidor: "));
+  Serial.println(response);
+  eviandoSMS = false;
 }
 
 void guardaSenha() {
-  
-  String senhaDigitada;
-  bool digitandoSenha = false;
+
 
   char key = keypad.getKey();
 
@@ -79,27 +83,35 @@ void guardaSenha() {
       digitandoSenha = false;
 
       if (senhaDigitada == SENHA_ATIVA) {
-//        Serial.println ("Ativado");
+        Serial.println (F("Ativado"));
         alarmeAtivado = true;
         apagaAcendeLed(A4, A5, A3, 0);
+        smsEnviado = false;
         delay(1000);
       }
       else if (alarmeAtivado && senhaDigitada == SENHA_CERTA) {
-//        Serial.println ("Desativado");
+        Serial.println (F("Desativado"));
         senhaCerta = true;
         apagaAcendeLed(A5, A3, A4, 0);
         alarmeAtivado = false;
       }
       else {
-//        Serial.println ("Incorreta");
-        apagaAcendeLed(A3, A5, A4, 1);
-        enviaSms ();
+        senhaIncorreta += 1;
+        Serial.println (F("Incorreta"));
+        if (senhaIncorreta >= 3) {
+          apagaAcendeLed(A3, A5, A4, 1);
+          if (!smsEnviado) {
+            enviaSms ();
+            smsEnviado = true;
+          }
+        }
       }
     }
 
     if (digitandoSenha) {
       senhaDigitada += key;
       Serial.println(senhaDigitada);
+      delay(50);
     }
 
     if (key == '*') {
@@ -125,7 +137,7 @@ void setup() {
   // Connect via DHCP
   //  Serial.println ("Conectando...");
   if (Ethernet.begin(mac)) {
-    Serial.println("Conectado via DHCP");
+    Serial.println(F("Conectado via DHCP"));
     //    Serial.print("IP recebido:"); Serial.println(Ethernet.localIP());
     //    delay(50);
   }
@@ -138,7 +150,7 @@ void loop() {
   int doorOpenClosed = digitalRead(8);
   if (alarmeAtivado && doorOpenClosed == 1) {
 
-    Serial.println("Digitar a senha");
+    Serial.println(F("Digitar a senha"));
 
     long timeDoorOpen = millis();
     senhaCerta = false;
@@ -148,15 +160,15 @@ void loop() {
 
       guardaSenha();
 
-      if (now - timeDoorOpen > 10000) {
+      if (!eviandoSMS && now - timeDoorOpen > 10000) {
         timeDoorOpen = now;
         apagaAcendeLed(A3, A5, A4, 1);
-        enviaSms ();
-
+        if (!smsEnviado) {
+          enviaSms ();
+          smsEnviado = true;
+        }
       }
-
     }
-
   }
 }
 
