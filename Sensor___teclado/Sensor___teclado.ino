@@ -49,8 +49,8 @@ void apagaAcendeLed(int ledAcesso, int ledApagado1, int ledApagado2) {
 }
 
 
-void enviaSms(){
-  
+void enviaSms() {
+
   String parametros = "sid=";
   parametros.concat(sid);
 
@@ -63,32 +63,15 @@ void enviaSms(){
   parametros.concat("&from=");
   parametros.concat(from);
 
-//  switch(situacao){
-//    case 1:{
-//      Serial.println("Alarme desativado");
-//      parametros.concat("&body=Alarme desativado");
-//      break;
-//    }
-//    case 2:{
-//      Serial.println("Sua casa esta sendo invadida");
-      parametros.concat("&body=Sua casa esta sendo invadida");
-//      break;
-//    }
-//    case 3:{
-////      Serial.println("Presenca detectada");
-//      parametros.concat("&body=Presenca detectada");
-//        break;
-//    }
-//  }
-  
-
+  parametros.concat("&body=Sua casa esta sendo invadida");
+ 
   Serial.println(parametros);
 
   int statusCode = client.post("/sms", parametros.c_str(), &response);
-  Serial.print("Status da resposta: ");
-  Serial.println(statusCode);
-  Serial.print("Resposta do servidor: ");
-  Serial.println(response);
+//  Serial.print("Status da resposta: ");
+//  Serial.println(statusCode);
+//  Serial.print("Resposta do servidor: ");
+//  Serial.println(response);
   delay(1000);
 }
 
@@ -102,9 +85,9 @@ void setup() {
   pinMode(ledGreen, OUTPUT);
   pinMode(infrared, INPUT);
 
-    // Connect via DHCP
-      Serial.println ("Conectando...");
-  if(Ethernet.begin(mac)) {
+  // Connect via DHCP
+  Serial.println ("Conectando...");
+  if (Ethernet.begin(mac)) {
     Serial.println("Conectado via DHCP");
     delay(50);
     Serial.print("IP recebido:"); Serial.println(Ethernet.localIP());
@@ -116,65 +99,65 @@ void loop() {
 
   char key = keypad.getKey();
   bool alarmeAtivado = false;
-  
+
   if (key) {
     if (key == '#') {
-      Serial.println("Finalizou senha");
+//      Serial.println("Finalizou senha");
       digitandoSenha = false;
 
       if (senhaDigitada == senhaAtiva) {
-        Serial.println ("Alarme ativado");
+//        Serial.println ("Alarme ativado");
         alarmeAtivado = true;
         apagaAcendeLed(ledYellow, ledGreen, ledRed);
         delay(1000);
       }
       else {
-        Serial.println ("Senha incorreta");
+//        Serial.println ("Senha incorreta");
       }
 
     }
 
     if (digitandoSenha) {
       senhaDigitada += key;
-      Serial.println (senhaDigitada);
+//      Serial.println (senhaDigitada);
     }
 
     if (key == '*') {
       senhaDigitada = "";
-      Serial.println("Iniciando digitação da senha...");
+//      Serial.println("Iniciando digitação da senha...");
       digitandoSenha = true;
     }
   }
 
-    while (alarmeAtivado == true) {
+  while (alarmeAtivado == true) {
     int doorOpenClosed = digitalRead(infrared);
-    
+
     if (doorOpenClosed == 1) {
-      Serial.println("Favor digitar a senha em ate 10 segundos");
-//      enviaSms ();
+//      Serial.println("Favor digitar a senha em ate 10 segundos");
+      //      enviaSms ();
       bool senhaCerta = false;
       timeDoorOpen = millis();
 
       while (senhaCerta == false) {
         long now = millis();
-//        Serial.println(now - timeDoorOpen);
-        
+        //        Serial.println(now - timeDoorOpen);
+
         char key = keypad.getKey();
 
         if (key) {
           if (key == '#') {
-            Serial.println("Finalizou senha");
+//            Serial.println("Finalizou senha");
             digitandoSenha = false;
             if (senhaDigitada == senha) {
-              Serial.println ("Alarme desativado");
+//              Serial.println ("Alarme desativado");
               senhaCerta = true;
               timeDoorOpen = now;
-//              enviaSms (1);
+              //              enviaSms (1);
               apagaAcendeLed(ledGreen, ledRed, ledYellow);
               alarmeAtivado = false;
             }
             else {
-              Serial.println ("Senha incorreta");
+//              Serial.println ("Senha incorreta");
               apagaAcendeLed(ledRed, ledGreen, ledYellow);
               enviaSms ();
               tone(buzz, 500);
@@ -186,12 +169,12 @@ void loop() {
 
           if (digitandoSenha) {
             senhaDigitada += key;
-            Serial.println (senhaDigitada);
+//            Serial.println (senhaDigitada);
           }
 
           if (key == '*') {
             senhaDigitada = "";
-            Serial.println("Iniciando digitação da senha...");
+//            Serial.println("Iniciando digitação da senha...");
             digitandoSenha = true;
           }
         }

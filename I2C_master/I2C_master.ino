@@ -106,6 +106,7 @@ void guardaSenha() {
         senhaCerta = true;
         apagaAcendeLed(ledGreen, ledRed, ledYellow, 0);
         alarmeAtivado = false;
+        senhaIncorreta = 0;
       }
       else {
         senhaIncorreta += 1;

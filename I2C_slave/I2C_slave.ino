@@ -15,7 +15,7 @@ RestClient client = RestClient("192.168.3.186", 3000, ethclient);
 #define SMS_TOKEN "a33eab98854ffcb2546bde7618d21da2"
 #define SMS_TO "5511963650954"
 #define SMS_FROM "13217668522"
-const char* parametros = "sid=" SMS_SID "&token=" SMS_TOKEN "&to=" SMS_TO "&from=" SMS_FROM "&body=Sua casa esta sendo invadida";
+#define PARAMETROS "sid=" SMS_SID "&token=" SMS_TOKEN "&to=" SMS_TO "&from=" SMS_FROM "&body=Sua casa esta sendo invadida"
 
 
 void setup() {
@@ -27,7 +27,7 @@ void setup() {
   Serial.println (F("Conectando..."));
   if (Ethernet.begin(mac)) {
     Serial.println(F("Conectado via DHCP"));
-    Serial.print(F("IP recebido:")); Serial.println(Ethernet.localIP());
+    //    Serial.print(F("IP recebido:")); Serial.println(Ethernet.localIP());
     delay(50);
   }
 
@@ -45,15 +45,20 @@ void comandoRecebido() {
 
   if (comando == 'h') {
     Serial.println(F("SMS enviado"));
+    Serial.flush();
 
-    char response[30] = {};
 
-//    Serial.println(parametros);
+    char response[10];
 
-    int statusCode = client.post("/sms", parametros, response);
+    String parametros = F(PARAMETROS);
+    int statusCode = client.post("/sms", parametros.c_str(), response);
     Serial.print(F("Status da resposta: "));
     Serial.println(statusCode);
     Serial.print(F("Resposta do servidor: "));
     Serial.println(response);
+
+    //    Serial.println(PARAMETROS);
+
+
   }
 }
